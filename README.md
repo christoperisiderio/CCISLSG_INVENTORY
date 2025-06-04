@@ -17,7 +17,7 @@ This guide will help you set up the CCISLSG Inventory System on your PC.
 
 ### 1. Clone the Repository
 ```bash
-git clone [repository-url]
+git clone https://github.com/christoperisiderio/CCISLSG_INVENTORY
 cd CCISLSG_INVENTORY
 ```
 
