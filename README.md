@@ -17,7 +17,7 @@ This guide will help you set up the CCISLSG Inventory System on your PC.
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/christoperisiderio/CCISLSG_INVENTORY
+git clone [repository-url]
 cd CCISLSG_INVENTORY
 ```
 
@@ -52,24 +52,24 @@ npm run dev
 ## Required Dependencies
 
 ### Frontend Dependencies
-- React 19.0.0
-- Material-UI (@mui/material, @mui/icons-material)
-- React Router DOM 7.5.2
-- Axios 1.9.0
-- React Responsive 10.0.1
+- React 19.0.0 - Core library for building user interfaces
+- Material-UI (@mui/material, @mui/icons-material) - UI component library for consistent design and pre-built components
+- React Router DOM 7.5.2 - Handles routing and navigation between different pages
+- Axios 1.9.0 - HTTP client for making API requests to the backend
+- React Responsive 10.0.1 - Helps create responsive layouts that adapt to different screen sizes
 
 ### Backend Dependencies
-- Express 4.18.2
-- MySQL2 3.6.0
-- bcrypt 5.1.1
-- jsonwebtoken 9.0.2
-- cors 2.8.5
-- multer 1.4.5-lts.1
+- Express 4.18.2 - Web framework for Node.js, handles HTTP requests and routing
+- MySQL2 3.6.0 - MySQL client for Node.js, enables database operations
+- bcrypt 5.1.1 - Password hashing library for secure user authentication
+- jsonwebtoken 9.0.2 - Creates and verifies JSON Web Tokens for user authentication
+- cors 2.8.5 - Enables Cross-Origin Resource Sharing for API access from frontend
+- multer 1.4.5-lts.1 - Handles file uploads in the application
 
 ## Development Tools
-- Vite 6.3.1 (Frontend build tool)
-- ESLint 9.22.0
-- Nodemon 3.0.1 (Backend development)
+- Vite 6.3.1 - Modern build tool that provides fast development server and optimized production builds
+- ESLint 9.22.0 - Code linting tool to maintain code quality and catch potential errors
+- Nodemon 3.0.1 - Automatically restarts the server when code changes are detected
 
 ## Troubleshooting
 
