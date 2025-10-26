@@ -95,7 +95,7 @@ function App() {
   return (
     <Router>
       <AppLayout>
-        <div className="logo-header">
+        {/* <div className="logo-header">
     
           {user && (
             <div className="user-info">
@@ -107,7 +107,7 @@ function App() {
     ) : null}
             </div>
           )}
-        </div>
+        </div> */}
         <Routes>
           <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
           <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />

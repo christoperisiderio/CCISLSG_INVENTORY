@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import projectLogo from '/logo.png';
 import './Auth.css';
 
 function Login({ onLogin }) {
@@ -39,7 +40,9 @@ function Login({ onLogin }) {
   };
 
   return (
+    
     <div className="auth-container">
+      <img src={projectLogo} className='project-logo'/>
       <div className="auth-card">
         <h2>Login</h2>
         {error && <div className="error-message">{error}</div>}

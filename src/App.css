@@ -9,8 +9,8 @@
 /* Variables */
 :root {
   /* COLORS */
-  --primary-color: #F4A851;
-  --text-color: #000000;
+  --primary-color: #120c26;
+  --text-color: #f8f5f5;
 
   /* FONT FAMILY */
   --font-primary: 'SF PRO', sans-serif;
@@ -22,7 +22,6 @@ p, h1, h2, h3, h4, h5, h6, span, div, a, label, input, textarea, select, button 
 }
 
 .main-section {
-  
   box-sizing: border-box;
   font-family: var(--font-primary);
   background-color: var(--primary-color);
