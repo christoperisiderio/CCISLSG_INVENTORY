@@ -84,7 +84,7 @@ function Register() {
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label className='label-color' htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
@@ -95,7 +95,7 @@ function Register() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label className='label-color' htmlFor="email">Email</label>
             <input
               type="email"
               id="email"
@@ -106,7 +106,7 @@ function Register() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label className='label-color' htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
@@ -117,7 +117,7 @@ function Register() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+            <label className='label-color' htmlFor="confirmPassword">Confirm Password</label>
             <input
               type="password"
               id="confirmPassword"
@@ -128,7 +128,7 @@ function Register() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="role">Role</label>
+            <label className='label-color' htmlFor="role">Role</label>
             <select
               id="role"
               name="role"
@@ -140,7 +140,7 @@ function Register() {
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="student_id">Student ID</label>
+            <label className='label-color' htmlFor="student_id">Student ID</label>
             <input
               type="text"
               id="student_id"

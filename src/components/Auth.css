@@ -1,6 +1,7 @@
 * {
  	box-sizing: border-box;
  	margin: 0;
+  color: white;
  	padding: 0;
  }
 
@@ -9,35 +10,38 @@
   flex-direction: column;
   justify-content: center;
   padding: 20px;
-  align-items: end;
+  align-items: center;
   min-height: 100vh;
   width: 99vw;
   overflow: hidden;
   background-image: linear-gradient(to left bottom, #dacdc2, #afa29b, #847a76, #5b5453, #353131, #3a2b2b, #3d2426, #401d21, #6d2d2d, #9b4132, #c65b2f, #eb7b22);
 }
 
+.label-color {
+  color: white !important;
+}
 .auth-card {
-
-  background-color: #fffdfd;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 30px;
   width: 30%;
-  height: 80%;
   box-sizing: border-box;
 }
-.project-logo {
-  width: 30px;
-  height: auto;
 
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.project-logo {
+  width: 150px;
+  margin-bottom: 30px;
+  height: auto;
 }
 
 .auth-card h2 {
   text-align: center;
   margin-bottom: 24px;
-  color: black;
+  color: white;
 }
 
 .form-group {
@@ -48,7 +52,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: bla;
+  color: white;
 }
 
 .form-group input,
@@ -113,7 +117,7 @@
 }
 
 .auth-links p {
-  color: black;
+  color: white;
   margin: 0;
 }
 

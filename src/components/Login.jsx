@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import projectLogo from '/logo.png';
+import projectLogo from '/public/logo.png';
 import './Auth.css';
 
 function Login({ onLogin }) {
@@ -48,7 +48,7 @@ function Login({ onLogin }) {
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label className='label-color' htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
@@ -58,7 +58,7 @@ function Login({ onLogin }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label className='label-color' htmlFor="password">Password</label>
             <input
               type="password"
               id="password"

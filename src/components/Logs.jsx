@@ -46,8 +46,8 @@ function Logs() {
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {logs.map((log, idx) => (
             <li key={idx} style={{ marginBottom: 18, paddingBottom: 12, borderBottom: '1px solid #e0e0e0' }}>
-              <div style={{ fontWeight: 600, color: '#333' }}>{actionLabels[log.action] || log.action}</div>
-              <div style={{ fontSize: 14, color: '#555' }}>
+              <div>{actionLabels[log.action] || log.action}</div>
+              <div style={{ fontSize: 14, color: 'white' }}>
                 <span><strong>User:</strong> {log.username} ({log.role})</span><br />
                 <span><strong>Item:</strong> {log.item_name}</span><br />
                 <span><strong>Quantity:</strong> {log.quantity}</span><br />
