@@ -64,39 +64,66 @@ function SearchSection() {
       ) : error ? (
         <div className="error-message">{error}</div>
       ) : (
-        <div className="requests-list">
-          {filteredInventory.map(item => (
-            <div key={item.id} className="request-card">
-              <div className="request-header">
-                <h3>{item.name}</h3>
-                {item.type === 'LOST-ITEM' && <span className="status-badge status-rejected">LOST-ITEM</span>}
-                {item.type === 'CCISLSG' && <span className="status-badge status-approved">CCISLSG</span>}
+        <>
+          {/* Inventory Items - Available to Borrow */}
+          <div style={{ marginBottom: 32 }}>
+            <h2 style={{ color: '#6366f1', marginBottom: 16 }}>📦 Inventory Items (Available to Borrow)</h2>
+            {filteredInventory.length > 0 ? (
+              <div className="requests-list">
+                {filteredInventory.map(item => (
+                  <div key={`inv-${item.id}`} className="request-card" style={{ borderLeft: '4px solid #6366f1' }}>
+                    <div className="request-header">
+                      <h3>{item.name}</h3>
+                      <span className="status-badge" style={{ backgroundColor: item.quantity > 0 ? '#10b981' : '#ef4444', color: 'white' }}>
+                        {item.quantity > 0 ? `${item.quantity} Available` : 'Out of Stock'}
+                      </span>
+                    </div>
+                    <div className="request-details">
+                      <p><strong>Location:</strong> {item.location}</p>
+                      <p><strong>Date Added:</strong> {item.date ? new Date(item.date).toLocaleDateString() : '-'}</p>
+                      <p><strong>Status:</strong> {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : 'Available'}</p>
+                      {item.description && <p><strong>Description:</strong> {item.description}</p>}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="request-details">
-                <p><strong>Location:</strong> {item.location}</p>
-                <p><strong>Date Registered:</strong> {item.date ? new Date(item.date).toLocaleDateString() : '-'}</p>
-                {item.quantity !== undefined && <p><strong>Quantity:</strong> {item.quantity}</p>}
-                {item.description && <p><strong>Description:</strong> {item.description}</p>}
+            ) : (
+              <p style={{ color: '#888', fontStyle: 'italic' }}>No inventory items available to borrow.</p>
+            )}
+          </div>
+
+          {/* Lost & Found Items - Available to Claim */}
+          <div>
+            <h2 style={{ color: '#ec4899', marginBottom: 16 }}>🔍 Lost & Found Items (Available to Claim)</h2>
+            {filteredLost.length > 0 ? (
+              <div className="requests-list">
+                {filteredLost.map(item => (
+                  <div key={`lost-${item.id}`} className="request-card" style={{ borderLeft: '4px solid #ec4899' }}>
+                    <div className="request-header">
+                      <h3>{item.name}</h3>
+                      <span className="status-badge" style={{ backgroundColor: '#f59e0b', color: 'white' }}>
+                        Lost Item
+                      </span>
+                    </div>
+                    <div className="request-details">
+                      <p><strong>Location:</strong> {item.location}</p>
+                      <p><strong>Date Reported:</strong> {item.date ? new Date(item.date).toLocaleDateString() : '-'}</p>
+                      {item.description && <p><strong>Description:</strong> {item.description}</p>}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-          {filteredLost.map(item => (
-            <div key={item.id} className="request-card">
-              <div className="request-header">
-                <h3>{item.name}</h3>
-                <span className="status-badge status-rejected">LOST-ITEM (Reported)</span>
-              </div>
-              <div className="request-details">
-                <p><strong>Location:</strong> {item.location}</p>
-                <p><strong>Date Reported:</strong> {item.date ? new Date(item.date).toLocaleDateString() : '-'}</p>
-                {item.description && <p><strong>Description:</strong> {item.description}</p>}
-              </div>
-            </div>
-          ))}
+            ) : (
+              <p style={{ color: '#888', fontStyle: 'italic' }}>No lost and found items currently reported.</p>
+            )}
+          </div>
+
           {filteredInventory.length === 0 && filteredLost.length === 0 && (
-            <p>No items found.</p>
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#999' }}>
+              <p>No items found matching your search.</p>
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

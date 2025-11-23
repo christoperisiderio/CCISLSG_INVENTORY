@@ -12,7 +12,6 @@ const navConfig = {
     { label: 'Dashboard', to: '/', icon: '🏠' },
     { label: 'Search', to: '/search', icon: '🔍' },
     { label: 'Report Lost Item', to: '/student-report', icon: '📝' },
-    { label: 'Logs', to: '/logs', icon: '📜' },
   ],
   admin: [
     { label: 'Dashboard', to: '/', icon: '🏠' },

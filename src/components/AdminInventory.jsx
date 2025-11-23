@@ -19,6 +19,7 @@ const AdminInventory = () => {
     quantity: '',
     description: '',
     photo: null,
+    status: 'available',
     type: 'CCISLSG' // Default type is always CCISLSG for admin inventory
   });
   const [formLoading, setFormLoading] = useState(false);
@@ -103,6 +104,7 @@ const AdminInventory = () => {
       quantity: '',
       description: '',
       photo: null,
+      status: 'available',
       type: 'CCISLSG' // Always set to CCISLSG for new items
     });
     setShowAddForm(true);
@@ -117,6 +119,7 @@ const AdminInventory = () => {
       quantity: item.quantity,
       description: item.description || '',
       photo: null,
+      status: item.status || 'available',
       type: 'CCISLSG' // Always set to CCISLSG for edited items
     });
     setShowEditForm(true);
@@ -189,6 +192,25 @@ const AdminInventory = () => {
     }
   };
 
+  // Calculate unclaimed and borrowed items
+  const calculateItemStats = () => {
+    let unclaimedCount = 0;
+    let borrowedCount = 0;
+
+    items.forEach(item => {
+      if (item.available > 0) {
+        unclaimedCount++;
+      }
+      if ((item.total_borrowed || 0) > 0) {
+        borrowedCount++;
+      }
+    });
+
+    return { unclaimedCount, borrowedCount };
+  };
+
+  const itemStats = calculateItemStats();
+
   return (
     <div className="admin-inventory" style={{ display: 'flex', gap: 100 }}>
       <div style={{ flex: 1 }}>
@@ -208,6 +230,17 @@ const AdminInventory = () => {
           {debugInfo && <div className="debug-info">{debugInfo}</div>}
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
+
+          <div className="stats-section" style={{ display: 'flex', gap: 20, marginBottom: 24 }}>
+            <div className="stat-card" style={{ flex: 1, padding: 16, background: '#e8f5e9', borderRadius: 8, border: '1px solid #4caf50' }}>
+              <h3 style={{ margin: 0, color: '#2e7d32', fontSize: 14 }}>Unclaimed Items</h3>
+              <p style={{ margin: '8px 0 0 0', fontSize: 28, fontWeight: 'bold', color: '#2e7d32' }}>{itemStats.unclaimedCount}</p>
+            </div>
+            <div className="stat-card" style={{ flex: 1, padding: 16, background: '#fff3e0', borderRadius: 8, border: '1px solid #ff9800' }}>
+              <h3 style={{ margin: 0, color: '#e65100', fontSize: 14 }}>Currently Borrowed</h3>
+              <p style={{ margin: '8px 0 0 0', fontSize: 28, fontWeight: 'bold', color: '#e65100' }}>{itemStats.borrowedCount}</p>
+            </div>
+          </div>
 
           <div className="search-bar">
             <input
@@ -304,6 +337,19 @@ const AdminInventory = () => {
                       onChange={(e) => setFormData({...formData, quantity: e.target.value})}
                       required
                     />
+                  </div>
+                  <div className="form-group">
+                    <label>Status:</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({...formData, status: e.target.value})}
+                      required
+                    >
+                      <option value="available">Available</option>
+                      <option value="unavailable">Unavailable</option>
+                      <option value="maintenance">Maintenance</option>
+                      <option value="damaged">Damaged</option>
+                    </select>
                   </div>
                   <div className="form-group">
                     <label>Description:</label>

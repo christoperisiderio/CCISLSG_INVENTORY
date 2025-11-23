@@ -54,7 +54,9 @@ function StudentDashboard({ handleLogout }) {
       });
       if (!response.ok) throw new Error('Failed to fetch items');
       const data = await response.json();
-      setItems(data);
+      // Filter for items with quantity > 0 (available items)
+      const availableItems = data.filter(item => item.quantity > 0);
+      setItems(availableItems);
     } catch (err) {
       setError(err.message);
     }
@@ -142,12 +144,11 @@ function StudentDashboard({ handleLogout }) {
     }
   };
 
-  // Show all CCISLSG items, but only allow borrowing if available > 0
+  // Show all available items (quantity > 0)
   const filteredItems = items.filter(item =>
-    item.type === 'CCISLSG' &&
     (item.name.toLowerCase().includes(search.toLowerCase()) ||
       (item.location && item.location.toLowerCase().includes(search.toLowerCase()))) &&
-    (item.available > 0)
+    (item.quantity > 0)
   );
 
   if (loading) {
@@ -158,37 +159,40 @@ function StudentDashboard({ handleLogout }) {
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h1>Student Dashboard</h1>
-        <div style={{ position: 'relative', marginLeft: 16 }}>
-          <button
-            className="notification-bell"
-            onClick={() => setShowNotifications(!showNotifications)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24 }}
-            aria-label="Notifications"
-          >
-            🔔
-            {notifications.some(n => !n.is_read) && (
-              <span style={{ position: 'absolute', top: 0, right: 0, width: 12, height: 12, background: 'green', borderRadius: '50%', display: 'inline-block', border: '2px solid white' }}></span>
-            )}
-          </button>
-          {showNotifications && (
-            <div style={{ position: 'absolute', right: 0, top: 36, background: 'white', color: 'black', border: '1px solid #ddd', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', minWidth: 260, zIndex: 10 }}>
-              <div style={{ padding: 12, borderBottom: '1px solid #eee', fontWeight: 600 }}>Notifications</div>
-              {notifications.length === 0 ? (
-                <div style={{ padding: 12 }}>No notifications.</div>
-              ) : (
-                notifications.map(n => (
-                  <div
-                    key={n.id}
-                    style={{ padding: 12, background: n.is_read ? 'white' : '#e8f5e9', cursor: 'pointer', borderBottom: '1px solid #f0f0f0' }}
-                    onClick={() => markNotificationRead(n.id)}
-                  >
-                    <span>{n.message}</span>
-                    {!n.is_read && <span style={{ marginLeft: 8, color: 'green', fontWeight: 700 }}>(new)</span>}
-                  </div>
-                ))
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ position: 'relative' }}>
+            <button
+              className="notification-bell"
+              onClick={() => setShowNotifications(!showNotifications)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24 }}
+              aria-label="Notifications"
+            >
+              🔔
+              {notifications.some(n => !n.is_read) && (
+                <span style={{ position: 'absolute', top: 0, right: 0, width: 12, height: 12, background: 'green', borderRadius: '50%', display: 'inline-block', border: '2px solid white' }}></span>
               )}
-            </div>
-          )}
+            </button>
+            {showNotifications && (
+              <div style={{ position: 'absolute', right: 0, top: 36, background: 'white', color: 'black', border: '1px solid #ddd', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', minWidth: 260, zIndex: 10 }}>
+                <div style={{ padding: 12, borderBottom: '1px solid #eee', fontWeight: 600 }}>Notifications</div>
+                {notifications.length === 0 ? (
+                  <div style={{ padding: 12 }}>No notifications.</div>
+                ) : (
+                  notifications.map(n => (
+                    <div
+                      key={n.id}
+                      style={{ padding: 12, background: n.is_read ? 'white' : '#e8f5e9', cursor: 'pointer', borderBottom: '1px solid #f0f0f0' }}
+                      onClick={() => markNotificationRead(n.id)}
+                    >
+                      <span>{n.message}</span>
+                      {!n.is_read && <span style={{ marginLeft: 8, color: 'green', fontWeight: 700 }}>(new)</span>}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+          <button className="logout-btn" onClick={handleLogout}>Logout</button>
         </div>
       </div>
       {error && <div className="error-message">{error}</div>}
@@ -218,15 +222,9 @@ function StudentDashboard({ handleLogout }) {
                   {request.notes && <p><strong>Notes:</strong> {request.notes}</p>}
                 </div>
                 <div style={{marginTop: 10}}>
-                  {request.status === 'pending' ? (
-                    <button className="auth-button" onClick={() => setSelectedItem(request)}>
-                      View Details
-                    </button>
-                  ) : (
-                    <button className="auth-button" onClick={() => setSelectedItem(request)}>
-                      Update Details
-                    </button>
-                  )}
+                  <button className="auth-button" onClick={() => setSelectedItem(request)} disabled>
+                    View Details Only
+                  </button>
                 </div>
               </div>
             ))}
@@ -250,13 +248,16 @@ function StudentDashboard({ handleLogout }) {
               <div key={item.id} className="request-card">
                 <div className="request-header">
                   <h3>{item.name}</h3>
-                  <span className="status-badge status-pending">{item.status}</span>
+                  {item.available > 0 ? (
+                    <span className="status-badge status-pending">{item.status}</span>
+                  ) : (
+                    <span className="status-badge" style={{background: '#e0e0e0', color: '#666'}}>unavailable</span>
+                  )}
                 </div>
                 <div className="request-details">
                   <p><strong>Location:</strong> {item.location}</p>
                   <p><strong>Date Registered:</strong> {item.date ? new Date(item.date).toLocaleDateString() : '-'}</p>
-                  {item.available !== undefined && <p><strong>Available:</strong> {item.available}</p>}
-                  {item.description && <p><strong>Description:</strong> {item.description}</p>}
+                  {item.available !== undefined && <p><strong>Available Quantity:</strong> {item.available}</p>}
                 </div>
                 {item.available > 0 ? (
                   <button className="auth-button" style={{marginTop: 10}} onClick={() => handleBorrow(item)}>
@@ -264,7 +265,7 @@ function StudentDashboard({ handleLogout }) {
                   </button>
                 ) : (
                   <div style={{marginTop: 10, color: '#666', fontStyle: 'italic'}}>
-                    Unavailable for borrowing
+                    Out of Stock
                   </div>
                 )}
               </div>
@@ -279,8 +280,7 @@ function StudentDashboard({ handleLogout }) {
             <div className="request-details">
               <p><strong>Location:</strong> {selectedItem.location}</p>
               <p><strong>Date Registered:</strong> {selectedItem.date ? new Date(selectedItem.date).toLocaleDateString() : '-'}</p>
-              {selectedItem.available !== undefined && <p><strong>Available:</strong> {selectedItem.available}</p>}
-              {selectedItem.description && <p><strong>Description:</strong> {selectedItem.description}</p>}
+              {selectedItem.available !== undefined && <p><strong>Available Quantity:</strong> {selectedItem.available}</p>}
             </div>
             <div className="form-group">
               <label htmlFor="borrowQuantity">Quantity</label>

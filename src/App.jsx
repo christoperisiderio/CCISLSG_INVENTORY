@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } f
 import { useState, useEffect } from 'react';
 import projectLogo from '/logo.png';
 import './App.css';
+import MobileApp from './components/MobileApp';
 import ReportSection from './ReportSection';
 import SearchSection from './SearchSection';
 import Login from './components/Login';
@@ -17,6 +18,17 @@ import Logs from './components/Logs';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobilePage, setMobilePage] = useState('dashboard');
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Check if user is logged in
@@ -30,7 +42,8 @@ function App() {
       })
         .then(res => {
           if (!res.ok) {
-            throw new Error('Token invalid');
+            // Token is invalid or expired
+            throw new Error('Token invalid or expired');
           }
           return res.json();
         })
@@ -39,7 +52,9 @@ function App() {
         })
         .catch(err => {
           console.error('Auth error:', err);
+          // Clear invalid token
           localStorage.removeItem('token');
+          setUser(null);
         })
         .finally(() => {
           setLoading(false);
@@ -54,9 +69,23 @@ function App() {
     localStorage.setItem('token', token);
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('token');
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      // Call backend logout endpoint
+      await fetch('http://localhost:3001/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear local state and storage regardless of backend response
+      setUser(null);
+      localStorage.removeItem('token');
+    }
   };
 
   // Protected route component
@@ -69,7 +98,7 @@ function App() {
       return <Navigate to="/login" />;
     }
     
-    if (adminOnly && user.role !== 'admin') {
+    if (adminOnly && (user.role !== 'admin' && user.role !== 'superadmin')) {
       return <Navigate to="/" />;
     }
     
@@ -83,7 +112,7 @@ function App() {
     return (
       <div className="app-flex-layout">
         {!hideSidebar && user && (
-          <Sidebar role={user.admin_role === 'superadmin' ? 'superadmin' : user.role} />
+          <Sidebar role={user.role === 'superadmin' ? 'superadmin' : user.role} />
         )}
         <div className="main-content-area">
           {children}
@@ -94,34 +123,51 @@ function App() {
 
   return (
     <Router>
-      <AppLayout>
-        {/* <div className="logo-header">
-    
-          {user && (
-            <div className="user-info">
-              <span>Welcome, {user.username}</span>
-                  {(user.admin_role !== 'admin' && user.admin_role !== 'superadmin' && user.admin_role !== 'Property Custodian') ? (
-        <button onClick={handleLogout} className="logout-btn">
-            Logout
-        </button>
-    ) : null}
-            </div>
-          )}
-        </div> */}
-        <Routes>
+      {isMobile && user ? (
+        <MobileApp 
+          user={user} 
+          handleLogout={handleLogout}
+          currentPage={mobilePage}
+          onNavigate={setMobilePage}
+        />
+      ) : (
+        <AppLayout>
+          {/* <div className="logo-header">
+      
+            {user && (
+              <div className="user-info">
+                <span>Welcome, {user.username}</span>
+                    {(user.admin_role !== 'admin' && user.admin_role !== 'superadmin' && user.admin_role !== 'Property Custodian') ? (
+          <button onClick={handleLogout} className="logout-btn">
+              Logout
+          </button>
+      ) : null}
+              </div>
+            )}
+          </div> */}
+          <Routes>
           <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
           <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
           <Route path="/" element={
             <ProtectedRoute>
-              {user?.admin_role === 'superadmin' ? <Navigate to="/superadmin" />
+              {user?.role === 'superadmin' ? <SuperadminDashboard handleLogout={handleLogout} />
                 : user?.role === 'admin' 
-                  ? <AdminDashboard handleLogout={handleLogout} /> 
+                  ? <AdminDashboard handleLogout={handleLogout} />
+                : user?.role === 'pending_admin'
+                  ? <div style={{ padding: '40px', textAlign: 'center' }}>
+                      <h2>Pending Approval</h2>
+                      <p>Your admin request is pending approval from a superadmin.</p>
+                      <p>You will have full access once approved.</p>
+                      <button onClick={handleLogout} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '16px' }}>
+                        Logout
+                      </button>
+                    </div>
                   : <StudentDashboard handleLogout={handleLogout} />}
             </ProtectedRoute>
           } />
           <Route path="/superadmin" element={
             <ProtectedRoute>
-              {user?.admin_role === 'superadmin' ? <SuperadminDashboard handleLogout={handleLogout} /> : <Navigate to="/" />}
+              {user?.role === 'superadmin' ? <SuperadminDashboard handleLogout={handleLogout} /> : <Navigate to="/" />}
             </ProtectedRoute>
           } />
           <Route path="/admin-inventory" element={
@@ -145,8 +191,9 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/logs" element={<Logs />} />
-        </Routes>
-      </AppLayout>
+          </Routes>
+        </AppLayout>
+      )}
     </Router>
   );
 }
