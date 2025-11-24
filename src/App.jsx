@@ -14,6 +14,8 @@ import SuperadminDashboard from './components/SuperadminDashboard';
 import AdminInventory from './components/AdminInventory';
 import Sidebar from './components/Sidebar';
 import Logs from './components/Logs';
+import LostItemsAdmin from './components/LostItemsAdmin';
+import AdminClaimRequests from './components/AdminClaimRequests';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -188,6 +190,16 @@ function App() {
           <Route path="/borrow-requests" element={
             <ProtectedRoute adminOnly>
               <BorrowRequests />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin-lost-items" element={
+            <ProtectedRoute adminOnly>
+              <LostItemsAdmin />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin-claim-requests" element={
+            <ProtectedRoute adminOnly>
+              <AdminClaimRequests />
             </ProtectedRoute>
           } />
           <Route path="/logs" element={<Logs />} />

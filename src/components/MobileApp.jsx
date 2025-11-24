@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import '../Mobile.css';
+import HomeIcon from '@mui/icons-material/Home';
+import SearchIcon from '@mui/icons-material/Search';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import ReportIcon from '@mui/icons-material/Report';
 
 export default function MobileApp({ user, handleLogout, currentPage, onNavigate }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -26,7 +30,7 @@ export default function MobileApp({ user, handleLogout, currentPage, onNavigate 
     <div className="mobile-container">
       {/* Mobile Header */}
       <div className="mobile-header">
-        <h1>📦 CCISLSG</h1>
+        <h1>CCISLSG</h1>
         <div className="mobile-header-right">
           {user.admin_role === 'superadmin' && (
             <span className="mobile-badge">Superadmin</span>
@@ -54,28 +58,28 @@ export default function MobileApp({ user, handleLogout, currentPage, onNavigate 
           className={`mobile-nav-item ${currentPage === 'dashboard' ? 'active' : ''}`}
           onClick={() => onNavigate('dashboard')}
         >
-          <span className="mobile-nav-item-icon">🏠</span>
+          <HomeIcon sx={{ fontSize: 24 }} />
           <span>Home</span>
         </button>
         <button 
           className={`mobile-nav-item ${currentPage === 'search' ? 'active' : ''}`}
           onClick={() => onNavigate('search')}
         >
-          <span className="mobile-nav-item-icon">🔍</span>
+          <SearchIcon sx={{ fontSize: 24 }} />
           <span>Search</span>
         </button>
         <button 
           className={`mobile-nav-item ${currentPage === 'requests' ? 'active' : ''}`}
           onClick={() => onNavigate('requests')}
         >
-          <span className="mobile-nav-item-icon">📋</span>
+          <AssignmentIcon sx={{ fontSize: 24 }} />
           <span>Requests</span>
         </button>
         <button 
           className={`mobile-nav-item ${currentPage === 'report' ? 'active' : ''}`}
           onClick={() => onNavigate('report')}
         >
-          <span className="mobile-nav-item-icon">📝</span>
+          <ReportIcon sx={{ fontSize: 24 }} />
           <span>Report</span>
         </button>
       </div>
@@ -87,7 +91,7 @@ function StudentMobileView({ user }) {
   return (
     <>
       <div className="mobile-hero">
-        <h1>Welcome back! 👋</h1>
+        <h1>Welcome back!</h1>
         <p>Browse available items to borrow</p>
       </div>
 
@@ -103,7 +107,7 @@ function StudentMobileView({ user }) {
       </div>
 
       <div className="mobile-card">
-        <h2>🔍 Quick Search</h2>
+        <h2>Quick Search</h2>
         <div className="mobile-search">
           <span>🔎</span>
           <input type="text" placeholder="Search items..." />
@@ -111,7 +115,7 @@ function StudentMobileView({ user }) {
       </div>
 
       <div className="mobile-card">
-        <h2>📦 Recent Borrows</h2>
+        <h2>Recent Borrows</h2>
         <div className="mobile-list">
           <div className="mobile-list-item">
             <div className="mobile-list-item-left">
@@ -137,7 +141,7 @@ function AdminMobileView({ user }) {
   return (
     <>
       <div className="mobile-hero">
-        <h1>Admin Panel 🛠️</h1>
+        <h1>Admin Panel</h1>
         <p>Manage inventory and requests</p>
       </div>
 
@@ -153,7 +157,7 @@ function AdminMobileView({ user }) {
       </div>
 
       <div className="mobile-card">
-        <h2>⏳ Pending Requests</h2>
+        <h2>Pending Requests</h2>
         <div className="mobile-list">
           <div className="mobile-list-item">
             <div className="mobile-list-item-left">
@@ -231,7 +235,7 @@ function PendingMobileView() {
   return (
     <>
       <div className="mobile-empty-state" style={{ marginTop: '60px' }}>
-        <div className="mobile-empty-state-icon">⏳</div>
+        <div className="mobile-empty-state-icon">∅</div>
         <h3>Pending Approval</h3>
         <p>Your admin request is under review by superadmin</p>
         <p style={{ marginTop: '16px', fontSize: '0.85rem' }}>
@@ -246,7 +250,7 @@ function DashboardMobileView({ user, activeTab, setActiveTab }) {
   return (
     <>
       <div className="mobile-hero">
-        <h1>Inventory System 📦</h1>
+        <h1>Inventory System</h1>
         <p>Welcome to CCISLSG</p>
       </div>
 

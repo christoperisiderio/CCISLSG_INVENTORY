@@ -5,6 +5,8 @@ const actionLabels = {
   borrow: 'Borrowed',
   add_inventory: 'Inventory Added',
   report_lost: 'Lost Item Reported',
+  claim_request: 'Claim Request Submitted',
+  claim_response: 'Claim Request Response',
 };
 
 function Logs() {
@@ -50,9 +52,23 @@ function Logs() {
               <div style={{ fontSize: 14, color: 'white' }}>
                 <span><strong>User:</strong> {log.username} ({log.role})</span><br />
                 <span><strong>Item:</strong> {log.item_name}</span><br />
-                <span><strong>Quantity:</strong> {log.quantity}</span><br />
+                {log.quantity && <span><strong>Quantity:</strong> {log.quantity}</span>}
+                {log.quantity && <br />}
                 <span><strong>Date:</strong> {log.date ? new Date(log.date).toLocaleString() : '-'}</span>
-                {log.status && <><br /><span><strong>Status:</strong> {log.status}</span></>}
+                {log.status && <><br /><span><strong>Status:</strong> <span style={{
+                  padding: '2px 6px',
+                  borderRadius: 4,
+                  background:
+                    log.status === 'approved' ? '#28a745' :
+                    log.status === 'pending' ? '#ffc107' :
+                    log.status === 'rejected' ? '#dc3545' :
+                    log.status === 'partial' ? '#ffc107' :
+                    log.status === 'approved' ? '#28a745' :
+                    log.status === 'returned' ? '#17a2b8' : '#6c757d',
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: 12
+                }}>{log.status}</span></span></>}
                 {log.return_date && <><br /><span><strong>Return Date:</strong> {log.return_date ? new Date(log.return_date).toLocaleDateString() : '-'}</span></>}
               </div>
             </li>

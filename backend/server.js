@@ -126,9 +126,24 @@ createDatabaseIfNotExists().then(() => {
           date DATE NOT NULL,
           location VARCHAR(255) NOT NULL,
           photo VARCHAR(255),
+          description TEXT,
+          status VARCHAR(50) DEFAULT 'unclaimed',
+          claimed_by_user VARCHAR(255),
+          claim_notes TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           user_id INTEGER REFERENCES users(id)
         )
+      `);
+
+      // Add missing columns to reported_items if they don't exist
+      await pool.query(`
+        ALTER TABLE reported_items
+        ADD COLUMN IF NOT EXISTS description TEXT,
+        ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'unclaimed',
+        ADD COLUMN IF NOT EXISTS claimed_by_user VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS claim_notes TEXT,
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       `);
 
       // Create notifications table
@@ -191,6 +206,29 @@ createDatabaseIfNotExists().then(() => {
       await pool.query(`
         ALTER TABLE admin_post_replies
         ADD COLUMN IF NOT EXISTS photo VARCHAR(255)
+      `);
+
+      // Create claim_requests table for lost item claims
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS claim_requests (
+          id SERIAL PRIMARY KEY,
+          item_id INTEGER NOT NULL REFERENCES reported_items(id) ON DELETE CASCADE,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          username VARCHAR(255) NOT NULL,
+          status VARCHAR(50) DEFAULT 'pending',
+          claim_notes TEXT,
+          photo VARCHAR(255),
+          student_id VARCHAR(255),
+          approval_admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // Add approval_admin_id column if it doesn't exist (migration for existing databases)
+      await pool.query(`
+        ALTER TABLE claim_requests
+        ADD COLUMN IF NOT EXISTS approval_admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL
       `);
 
       console.log('Database tables created or already exist');
@@ -759,8 +797,17 @@ createDatabaseIfNotExists().then(() => {
   // Export only CCISLSG items to CSV
   app.get('/api/admin/export-ccislsg', verifyToken, isAdmin, async (req, res) => {
     try {
-      const result = await pool.query("SELECT * FROM items WHERE type = 'CCISLSG'");
-      const csv = convertToCSV(result.rows);
+      const result = await pool.query("SELECT id, name, quantity, date, location, status, description, created_at FROM items ORDER BY created_at DESC");
+      
+      // For each item, calculate total borrowed and available
+      const items = result.rows;
+      for (let item of items) {
+        const borrowedRes = await pool.query('SELECT SUM(quantity) as total_borrowed FROM borrow_requests WHERE item_id = $1 AND (status = $2 OR status = $3)', [item.id, 'approved', 'partial']);
+        item.total_borrowed = parseInt(borrowedRes.rows[0].total_borrowed, 10) || 0;
+        item.available = item.quantity - item.total_borrowed;
+      }
+      
+      const csv = convertToCSV(items);
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', 'attachment; filename=ccislsg_inventory.csv');
       res.send(csv);
@@ -772,13 +819,18 @@ createDatabaseIfNotExists().then(() => {
 
   // Helper function to convert JSON to CSV
   function convertToCSV(items) {
-    const headers = ['id', 'name', 'date', 'location', 'status', 'created_at'];
+    const headers = ['id', 'name', 'quantity', 'available', 'total_borrowed', 'date', 'location', 'status', 'description', 'created_at'];
     const csvRows = [headers.join(',')];
     
     for (const item of items) {
       const values = headers.map(header => {
         const value = item[header];
-        return `"${value}"`;
+        // Escape quotes and wrap in quotes if value contains comma
+        if (value === null || value === undefined) {
+          return '""';
+        }
+        const stringValue = String(value).replace(/"/g, '""');
+        return `"${stringValue}"`;
       });
       csvRows.push(values.join(','));
     }
@@ -786,21 +838,168 @@ createDatabaseIfNotExists().then(() => {
     return csvRows.join('\n');
   }
 
-  // Report a lost item (students)
+  // Report a lost item (admin/superadmin only)
   app.post('/api/reported-items', verifyToken, upload.single('photo'), async (req, res) => {
-    if (req.user.role !== 'student') {
-      return res.status(403).json({ message: 'Only students can report lost items' });
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin' && req.user.role !== 'pending_admin') {
+      return res.status(403).json({ message: 'Only admins can report lost items' });
     }
-    const { name, date, location } = req.body;
+    const { name, date, location, description } = req.body;
     const photo = req.file ? req.file.filename : null;
     try {
       const result = await pool.query(
-        'INSERT INTO reported_items (name, date, location, photo, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [name, date, location, photo, req.user.id]
+        'INSERT INTO reported_items (name, date, location, photo, user_id, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [name, date, location, photo, req.user.id, description || null]
       );
       res.status(201).json(result.rows[0]);
     } catch (error) {
       console.error('Report lost item error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update reported item status (admin/superadmin only - mark as surrendered to owner)
+  app.patch('/api/reported-items/:id', verifyToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin' && req.user.role !== 'pending_admin') {
+      return res.status(403).json({ message: 'Only admins can update lost items' });
+    }
+    const { id } = req.params;
+    const { status, claimed_by_user, claim_notes } = req.body;
+    
+    try {
+      const result = await pool.query(
+        'UPDATE reported_items SET status = $1, claimed_by_user = $2, claim_notes = $3, updated_at = NOW() WHERE id = $4 RETURNING *',
+        [status, claimed_by_user || null, claim_notes || null, id]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Item not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Update lost item error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Student submit claim request for lost item (students only)
+  app.post('/api/reported-items/:id/claim', verifyToken, upload.single('photo'), async (req, res) => {
+    if (req.user.role !== 'student') {
+      return res.status(403).json({ message: 'Only students can claim lost items' });
+    }
+    const { id } = req.params;
+    const { claim_notes, student_id } = req.body;
+    const photoFile = req.file ? req.file.filename : null;
+    
+    try {
+      // Check if item exists and is unclaimed
+      const itemCheck = await pool.query('SELECT * FROM reported_items WHERE id = $1', [id]);
+      if (itemCheck.rows.length === 0) {
+        return res.status(404).json({ message: 'Item not found' });
+      }
+      
+      const item = itemCheck.rows[0];
+      if (item.status !== 'unclaimed') {
+        return res.status(400).json({ message: 'Item is no longer available for claiming' });
+      }
+      
+      // Check if student already has a pending claim for this item
+      const existingClaim = await pool.query(
+        'SELECT * FROM claim_requests WHERE item_id = $1 AND user_id = $2 AND status = $3',
+        [id, req.user.id, 'pending']
+      );
+      
+      if (existingClaim.rows.length > 0) {
+        return res.status(400).json({ message: 'You already have a pending claim for this item' });
+      }
+      
+      // Create claim request
+      const result = await pool.query(
+        'INSERT INTO claim_requests (item_id, user_id, username, status, claim_notes, photo, student_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) RETURNING *',
+        [id, req.user.id, req.user.username, 'pending', claim_notes || '', photoFile, student_id || '']
+      );
+      
+      res.json({ message: 'Claim request submitted successfully. Waiting for admin approval.', claim: result.rows[0] });
+    } catch (error) {
+      console.error('Claim lost item error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get all claim requests (admin/superadmin only)
+  app.get('/api/claim-requests', verifyToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin' && req.user.role !== 'pending_admin') {
+      return res.status(403).json({ message: 'Only admins can view claim requests' });
+    }
+
+    const statusFilter = req.query.status; // optional: 'pending', 'approved', 'rejected'
+    let query = `
+      SELECT 
+        cr.*,
+        ri.name as item_name,
+        ri.photo as item_photo,
+        ri.location,
+        ri.description as item_description
+      FROM claim_requests cr
+      JOIN reported_items ri ON cr.item_id = ri.id
+    `;
+    let params = [];
+
+    if (statusFilter) {
+      query += ' WHERE cr.status = $1';
+      params.push(statusFilter);
+    }
+
+    query += ' ORDER BY cr.created_at DESC';
+
+    try {
+      const result = await pool.query(query, params);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Get claim requests error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Approve or reject claim request (admin/superadmin only)
+  app.patch('/api/claim-requests/:id', verifyToken, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin' && req.user.role !== 'pending_admin') {
+      return res.status(403).json({ message: 'Only admins can update claim requests' });
+    }
+
+    const { id } = req.params;
+    const { status } = req.body; // 'approved' or 'rejected'
+
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Status must be approved or rejected' });
+    }
+
+    try {
+      // Get the claim request
+      const claimCheck = await pool.query('SELECT * FROM claim_requests WHERE id = $1', [id]);
+      if (claimCheck.rows.length === 0) {
+        return res.status(404).json({ message: 'Claim request not found' });
+      }
+
+      const claim = claimCheck.rows[0];
+
+      // Update claim status
+      const result = await pool.query(
+        'UPDATE claim_requests SET status = $1, approval_admin_id = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+        [status, req.user.id, id]
+      );
+
+      // If approved, update the reported_items record
+      if (status === 'approved') {
+        await pool.query(
+          'UPDATE reported_items SET status = $1, claimed_by_user = $2, updated_at = NOW() WHERE id = $3',
+          ['claimed', claim.username, claim.item_id]
+        );
+      }
+
+      res.json({ message: `Claim request ${status} successfully`, claim: result.rows[0] });
+    } catch (error) {
+      console.error('Update claim request error:', error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -854,13 +1053,34 @@ createDatabaseIfNotExists().then(() => {
         ORDER BY r.created_at DESC
         LIMIT 20
       `);
+      // Recent claim requests (students submitting claims)
+      const claimRequestLogs = await pool.query(`
+        SELECT cr.id, 'claim_request' as action, u.username, u.role, ri.name as item_name, cr.status, cr.created_at as date
+        FROM claim_requests cr
+        JOIN users u ON cr.user_id = u.id
+        JOIN reported_items ri ON cr.item_id = ri.id
+        ORDER BY cr.created_at DESC
+        LIMIT 20
+      `);
+      // Recent claim approvals/rejections (admin responses)
+      const claimResponseLogs = await pool.query(`
+        SELECT cr.id, 'claim_response' as action, COALESCE(u_admin.username, 'Unknown') as username, COALESCE(u_admin.role, 'admin') as role, ri.name as item_name, cr.status, cr.updated_at as date
+        FROM claim_requests cr
+        JOIN reported_items ri ON cr.item_id = ri.id
+        LEFT JOIN users u_admin ON cr.approval_admin_id = u_admin.id
+        WHERE cr.status IN ('approved', 'rejected')
+        ORDER BY cr.updated_at DESC
+        LIMIT 20
+      `);
       // Merge and sort logs by date descending
       const logs = [
         ...borrowLogs.rows,
         ...inventoryLogs.rows,
-        ...lostLogs.rows
+        ...lostLogs.rows,
+        ...claimRequestLogs.rows,
+        ...claimResponseLogs.rows
       ].sort((a, b) => new Date(b.date) - new Date(a.date));
-      res.json(logs.slice(0, 40));
+      res.json(logs.slice(0, 60));
     } catch (error) {
       console.error('Get logs error:', error);
       res.status(500).json({ error: error.message });
@@ -1048,6 +1268,60 @@ createDatabaseIfNotExists().then(() => {
       res.json({ message: 'Reply deleted successfully' });
     } catch (error) {
       console.error('Delete reply error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Delete all lost items data (superadmin only)
+  app.delete('/api/admin/clear-lost-items', verifyToken, async (req, res) => {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only superadmin can clear lost items' });
+    }
+
+    try {
+      // Delete all claim requests first (foreign key constraint)
+      await pool.query('DELETE FROM claim_requests');
+      // Delete all reported items
+      await pool.query('DELETE FROM reported_items');
+      res.json({ message: 'All lost items and claim requests have been deleted successfully' });
+    } catch (error) {
+      console.error('Clear lost items error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Cancel claim request (student only - own claims)
+  app.delete('/api/claim-requests/:id/cancel', verifyToken, async (req, res) => {
+    if (req.user.role !== 'student') {
+      return res.status(403).json({ message: 'Only students can cancel their own claims' });
+    }
+
+    const { id } = req.params;
+
+    try {
+      // Check if claim exists and belongs to the student
+      const claimCheck = await pool.query(
+        'SELECT * FROM claim_requests WHERE id = $1 AND user_id = $2',
+        [id, req.user.id]
+      );
+
+      if (claimCheck.rows.length === 0) {
+        return res.status(404).json({ message: 'Claim request not found or not yours' });
+      }
+
+      const claim = claimCheck.rows[0];
+
+      // Only allow cancellation if status is pending
+      if (claim.status !== 'pending') {
+        return res.status(400).json({ message: `Cannot cancel ${claim.status} claim request` });
+      }
+
+     
+      await pool.query('DELETE FROM claim_requests WHERE id = $1', [id]);
+
+      res.json({ message: 'Claim request cancelled successfully' });
+    } catch (error) {
+      console.error('Cancel claim request error:', error);
       res.status(500).json({ error: error.message });
     }
   });

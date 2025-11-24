@@ -196,7 +196,7 @@ function QRScanner({ handleBorrow, items }) {
                   fontSize: '14px'
                 }}
               >
-                ⬇️ Download QR Code
+                Download QR Code
               </button>
             </div>
           )}

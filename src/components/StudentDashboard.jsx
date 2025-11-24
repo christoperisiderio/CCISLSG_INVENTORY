@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Dashboard.css';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
 function StudentDashboard({ handleLogout }) {
   const [myRequests, setMyRequests] = useState([]);
@@ -164,10 +165,10 @@ function StudentDashboard({ handleLogout }) {
             <button
               className="notification-bell"
               onClick={() => setShowNotifications(!showNotifications)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24 }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', position: 'relative' }}
               aria-label="Notifications"
             >
-              🔔
+              <NotificationsIcon sx={{ fontSize: 28, color: '#4a90e2' }} />
               {notifications.some(n => !n.is_read) && (
                 <span style={{ position: 'absolute', top: 0, right: 0, width: 12, height: 12, background: 'green', borderRadius: '50%', display: 'inline-block', border: '2px solid white' }}></span>
               )}
