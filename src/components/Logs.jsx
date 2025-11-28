@@ -37,7 +37,7 @@ function Logs() {
 
   return (
     <div className="dashboard-container" style={{ maxWidth: 700 }}>
-      <h1 style={{ color: '#4a90e2', marginBottom: 24 }}>Recent Logs</h1>
+      <h1 style={{ color: '#4a90e2', marginBottom: 24, color: 'black' }}>Recent Logs</h1>
       {loading ? (
         <div className="loading">Loading logs...</div>
       ) : error ? (

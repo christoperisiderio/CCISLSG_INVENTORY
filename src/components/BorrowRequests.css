@@ -2,15 +2,20 @@
   padding: 30px;
   max-width: 1400px;
   margin: 0 auto;
-  background: var(--bg-secondary);
   min-height: 100vh;
+ 
 }
 
-.borrow-requests-container h1 {
-  color: var(--text-primary);
+.borrow-requests-container h1{
   margin-bottom: 30px;
   font-size: 2rem;
   font-weight: 700;
+  color: white !important;
+}
+
+
+.borrow-requests-container p{
+  color: white !important;
 }
 
 .loading {

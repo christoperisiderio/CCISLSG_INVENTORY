@@ -232,11 +232,11 @@ const AdminInventory = () => {
           {success && <div className="success-message">{success}</div>}
 
           <div className="stats-section" style={{ display: 'flex', gap: 20, marginBottom: 24 }}>
-            <div className="stat-card" style={{ flex: 1, padding: 16, background: '#e8f5e9', borderRadius: 8, border: '1px solid #4caf50' }}>
+            <div className="stat-card" style={{ flex: 1, padding: 16, background: '#e8f5e9', borderRadius: 8}}>
               <h3 style={{ margin: 0, color: '#2e7d32', fontSize: 14 }}>Unclaimed Items</h3>
               <p style={{ margin: '8px 0 0 0', fontSize: 28, fontWeight: 'bold', color: '#2e7d32' }}>{itemStats.unclaimedCount}</p>
             </div>
-            <div className="stat-card" style={{ flex: 1, padding: 16, background: '#fff3e0', borderRadius: 8, border: '1px solid #ff9800' }}>
+            <div className="stat-card" style={{ flex: 1, padding: 16, background: '#fff3e0', borderRadius: 8}}>
               <h3 style={{ margin: 0, color: '#e65100', fontSize: 14 }}>Currently Borrowed</h3>
               <p style={{ margin: '8px 0 0 0', fontSize: 28, fontWeight: 'bold', color: '#e65100' }}>{itemStats.borrowedCount}</p>
             </div>
@@ -399,7 +399,7 @@ const AdminInventory = () => {
       </div>
       {/* Logs Sidebar */}
       <div style={{ width: 340, minWidth: 260, background: '#f7faff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', padding: 18, height: 'fit-content', maxHeight: '90vh', overflowY: 'auto' }}>
-        <h3 style={{ marginTop: 0, marginBottom: 16, color: '#4a90e2' }}>Recent Logs</h3>
+        <h3 style={{ marginTop: 0, marginBottom: 16, color: '#000000' }}>Recent Logs</h3>
         {logs.length === 0 ? (
           <div style={{ color: '#888', fontStyle: 'italic' }}>No recent activity.</div>
         ) : (

@@ -1,7 +1,18 @@
+
+
 .dashboard-bg {
   min-height: 100vh;
   padding: 40px 20px;
-  background: var(--bg-secondary);
+  background-color:hsla(0,100%,50%,1);
+  background-image:
+  radial-gradient(at 40% 20%, hsla(0,4%,12%,1) 0px, transparent 50%),
+  radial-gradient(at 80% 0%, hsla(189,0%,0%,1) 0px, transparent 50%),
+  radial-gradient(at 0% 50%, hsla(15,90%,51%,1) 0px, transparent 50%),
+  radial-gradient(at 80% 50%, hsla(340,0%,0%,1) 0px, transparent 50%),
+  radial-gradient(at 0% 100%, hsla(17,0%,9%,1) 0px, transparent 50%),
+  radial-gradient(at 89% 95%, hsla(240,83%,39%,1) 0px, transparent 50%),
+  radial-gradient(at 0% 0%, hsla(341,0%,0%,1) 0px, transparent 50%);
+    padding: 20px;
 }
 
 .dashboard-container {
@@ -70,8 +81,6 @@
 }
 
 .stat-card {
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-  border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   padding: 24px;
@@ -79,16 +88,7 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-}
 
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
 }
 
 .stat-card:hover {
@@ -369,6 +369,8 @@
   margin: 0 auto;
 }
 
+
+
 .inventory-header {
   display: flex;
   justify-content: space-between;
@@ -381,6 +383,10 @@
   align-items: center;
   gap: 15px;
   font-size: 10px;
+}
+
+.header-left h2 {
+    color: white !important;
 }
 
 .back-button {

@@ -106,8 +106,8 @@ function AdminClaimRequests() {
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ marginRight: 12, fontWeight: 600 }}>Filter by Status:</label>
+      <div style={{ marginBottom: 16}}>
+        <label style={{ marginRight: 12, fontWeight: 600, color: 'white' }}>Filter by Status:</label>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
