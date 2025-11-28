@@ -12,19 +12,37 @@
   min-height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background-color:hsla(0,100%,50%,1);
+  background-image:
+  radial-gradient(at 40% 20%, hsla(0,4%,12%,1) 0px, transparent 50%),
+  radial-gradient(at 80% 0%, hsla(189,0%,0%,1) 0px, transparent 50%),
+  radial-gradient(at 0% 50%, hsla(15,90%,51%,1) 0px, transparent 50%),
+  radial-gradient(at 80% 50%, hsla(340,0%,0%,1) 0px, transparent 50%),
+  radial-gradient(at 0% 100%, hsla(17,0%,9%,1) 0px, transparent 50%),
+  radial-gradient(at 89% 95%, hsla(240,83%,39%,1) 0px, transparent 50%),
+  radial-gradient(at 0% 0%, hsla(341,0%,0%,1) 0px, transparent 50%);
+    padding: 20px;
 }
 
 .label-color {
-  color: var(--text-secondary) !important;
+  color: white !important;
 }
 
 .auth-card {
   background: var(--bg-primary);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 6px 3px rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
   box-shadow: var(--shadow-2xl);
-  border: 1px solid var(--border-light);
   padding: 40px;
   width: 100%;
   max-width: 420px;
@@ -53,7 +71,7 @@
 .auth-card h2 {
   text-align: center;
   margin: 0 0 30px 0;
-  color: var(--text-primary);
+  color: white;
   font-size: 1.8rem;
   font-weight: 700;
 }
@@ -66,7 +84,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: white;
   font-size: 0.95rem;
 }
 
@@ -82,8 +100,8 @@
   font-family: inherit;
   transition: all 0.2s ease;
   box-sizing: border-box;
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  background-color: white;
+  color: white;
 }
 
 .form-group input:focus,
@@ -143,7 +161,7 @@
 }
 
 .auth-links p {
-  color: var(--text-secondary);
+  color: white;
   margin: 0;
 }
 

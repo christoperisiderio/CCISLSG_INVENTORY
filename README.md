@@ -2,6 +2,32 @@
 
 A comprehensive inventory management system supporting both borrowable equipment and lost & found items.
 
+## 🐳 Quick Setup with Docker (Recommended for Groupmates)
+
+**New to the project? Use Docker for the easiest setup!**
+
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd CCISLSG_INVENTORY
+
+# 2. Create environment file
+cp .env.example .env
+
+# 3. Edit .env (change DB_PASSWORD and JWT_SECRET to something secure)
+
+# 4. Start everything
+docker-compose up -d
+
+# 5. Open browser: http://localhost:3001
+```
+
+**📖 Full Docker Guide:** See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed instructions with troubleshooting.
+
+**⚡ TL;DR Version:** See [QUICK_START.md](QUICK_START.md)
+
+---
+
 ## 📋 System Overview
 
 The CCISLSG Inventory System has **two distinct features**:
